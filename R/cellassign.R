@@ -437,3 +437,11 @@ mleparams.cellassign <- function(x) {
 #' @examples
 #' data(holik_data)
 "holik_data"
+
+#' Basilisk environment
+#' 
+#' @keywords local
+#' 
+#' @importFrom basilisk BasiliskEnvironment
+cellassign_env <- BasiliskEnvironment("cellassign_env", pkgname="cellassign",
+                            packages=c("pandas==0.24.1", "python-dateutil==2.7.1", "pytz==2018.7"))
