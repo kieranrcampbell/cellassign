@@ -14,7 +14,6 @@ entry_stop_gradients <- function(target, mask) {
 
 #' cellassign inference in tensorflow, semi-supervised version
 #'
-#' @import tensorflow
 #'
 #' @return A list of MLE cell type calls, MLE parameter estimates,
 #' and log likelihoods during optimization.
@@ -41,6 +40,8 @@ inference_tensorflow <- function(Y,
                                  min_delta = 2,
                                  dirichlet_concentration = rep(1e-2, C),
                                  threads = 0) {
+  
+  tf <- reticulate::import('tensorflow')
 
   tf <- tf$compat$v1
   tf$disable_v2_behavior()

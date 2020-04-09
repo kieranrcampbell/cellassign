@@ -110,6 +110,8 @@
 #' learning_rate = 1e-2,
 #' shrinkage = TRUE,
 #' verbose = FALSE)
+#' 
+#' @importFrom basilisk basiliskStart basiliskRun basiliskStop
 #'
 #'
 #' @export
@@ -231,32 +233,39 @@ cellassign <- function(exprs_obj,
   res <- NULL
 
   seeds <- sample(.Machine$integer.max - 1, num_runs)
+  
+  cl <- basiliskStart(cellassign_env)
 
+  
   run_results <- lapply(seq_len(num_runs), function(i) {
-    res <- inference_tensorflow(Y = Y,
-                                rho = rho,
-                                s = s,
-                                X = X,
-                                G = G,
-                                C = C,
-                                N = N,
-                                P = P,
-                                B = B,
-                                shrinkage = shrinkage,
-                                verbose = verbose,
-                                n_batches = n_batches,
-                                rel_tol_adam = rel_tol_adam,
-                                rel_tol_em = rel_tol_em,
-                                max_iter_adam = max_iter_adam,
-                                max_iter_em = max_iter_em,
-                                learning_rate = learning_rate,
-                                min_delta = min_delta,
-                                dirichlet_concentration = dirichlet_concentration,
-                                random_seed = seeds[i],
-                                threads = as.integer(threads))
-
+    
+    res <- basiliskRun(cl, inference_tensorflow,
+                       Y = Y,
+                       rho = rho,
+                       s = s,
+                       X = X,
+                       G = G,
+                       C = C,
+                       N = N,
+                       P = P,
+                       B = B,
+                       shrinkage = shrinkage,
+                       verbose = verbose,
+                       n_batches = n_batches,
+                       rel_tol_adam = rel_tol_adam,
+                       rel_tol_em = rel_tol_em,
+                       max_iter_adam = max_iter_adam,
+                       max_iter_em = max_iter_em,
+                       learning_rate = learning_rate,
+                       min_delta = min_delta,
+                       dirichlet_concentration = dirichlet_concentration,
+                       random_seed = seeds[i],
+                       threads = as.integer(threads))
     return(structure(res, class = "cellassign"))
   })
+  
+  
+  basiliskStop(cl)
   # Return best result
   res <- run_results[[which.max(sapply(run_results, function(x) x$lls[length(x$lls)]))]]
 
@@ -444,4 +453,7 @@ mleparams.cellassign <- function(x) {
 #' 
 #' @importFrom basilisk BasiliskEnvironment
 cellassign_env <- BasiliskEnvironment("cellassign_env", pkgname="cellassign",
-                            packages=c("pandas==0.24.1", "python-dateutil==2.7.1", "pytz==2018.7"))
+                            packages=c("nomkl=3.0",
+                                       "python=3.7.4",
+                                       "tensorflow=2.0.0",
+                                       "tensorflow-probability=0.7.0"))
