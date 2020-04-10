@@ -452,8 +452,8 @@ mleparams.cellassign <- function(x) {
 #' @keywords local
 #' 
 #' @importFrom basilisk BasiliskEnvironment
-cellassign_env <- BasiliskEnvironment("cellassign_env", pkgname="cellassign",
-                            packages=c("nomkl=3.0",
-                                       "python=3.7.4",
-                                       "tensorflow=2.0.0",
-                                       "tensorflow-probability=0.7.0"))
+cellassign_env <- BasiliskEnvironment("cellassign_env", 
+                                      pkgname="cellassign",
+                                      packages=c("python==3.7.4"),
+                                      pip=c("tensorflow==2.1.0",
+                                            "tensorflow-probability==0.7.0"))

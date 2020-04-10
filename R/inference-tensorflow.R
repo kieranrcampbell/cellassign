@@ -2,12 +2,23 @@
 
 #' @keywords internal
 #' Taken from https://github.com/tensorflow/tensorflow/issues/9162
-entry_stop_gradients <- function(target, mask) {
+entry_stop_gradients <- function(target, mask, tf) {
   mask_h <- tf$logical_not(mask)
   mask <- tf$cast(mask, dtype = target$dtype)
   mask_h <- tf$cast(mask_h, dtype = target$dtype)
 
   tf$add(tf$stop_gradient(tf$multiply(mask_h, target)), tf$multiply(mask, target))
+}
+
+#' @keywords internal
+#' Pinched from tensorflow package
+shape <- function (...) {
+  values <- list(...)
+  lapply(values, function(value) {
+    if (!is.null(value)) 
+      as.integer(value)
+    else NULL
+  })
 }
 
 
@@ -17,6 +28,8 @@ entry_stop_gradients <- function(target, mask) {
 #'
 #' @return A list of MLE cell type calls, MLE parameter estimates,
 #' and log likelihoods during optimization.
+#' 
+#' @importFrom tensorflow dict
 #'
 #' @keywords internal
 inference_tensorflow <- function(Y,
@@ -42,10 +55,13 @@ inference_tensorflow <- function(Y,
                                  threads = 0) {
   
   tf <- reticulate::import('tensorflow')
+  
+
 
   tf <- tf$compat$v1
   tf$disable_v2_behavior()
 
+  stopifnot(!is.null(tf))
   tfp <- reticulate::import('tensorflow_probability')
   tfd <- tfp$distributions
 
@@ -117,7 +133,7 @@ inference_tensorflow <- function(Y,
   b <- tf$exp(tf$constant(rep(-log(b_init), B), dtype = tf$float64))
 
   # Stop gradient for irrelevant entries of delta_log
-  delta_log <- entry_stop_gradients(delta_log, tf$cast(rho_, tf$bool))
+  delta_log <- entry_stop_gradients(delta_log, tf$cast(rho_, tf$bool), tf)
 
   # Transformed variables
   delta = tf$exp(delta_log)
