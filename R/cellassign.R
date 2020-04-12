@@ -447,14 +447,33 @@ mleparams.cellassign <- function(x) {
 #' data(holik_data)
 "holik_data"
 
+#'
+#' @keywords local
+construct_cellassign_env <- function() {
+  is_mac <- Sys.info()[['sysname']] == "Darwin"
+  
+  if(is_mac) {
+    return(
+      BasiliskEnvironment("cellassign_env", 
+                          pkgname="cellassign",
+                          packages=c("python==3.7.2"),
+                          pip=c("tensorflow==2.1.0",
+                                "tensorflow-probability==0.7.0"))
+    )
+  } else {
+    return(
+      BasiliskEnvironment("cellassign_env", 
+                          pkgname="cellassign",
+                          packages=c("python==3.7.2",
+                                     "tensorflow==2.1.0",
+                                     "tensorflow-probability==0.7.0"))
+    )
+  }
+}
+
 #' Basilisk environment
 #' 
 #' @keywords local
 #' 
 #' @importFrom basilisk BasiliskEnvironment
-cellassign_env <- BasiliskEnvironment("cellassign_env", 
-                                      pkgname="cellassign",
-                                      packages=c("python==3.7.2",
-                                                 "openssl==1.1.1"),
-                                      pip=c("tensorflow==2.1.0",
-                                            "tensorflow-probability==0.7.0"))
+cellassign_env <- construct_cellassign_env()
